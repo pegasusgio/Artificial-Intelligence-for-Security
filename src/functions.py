@@ -1,5 +1,6 @@
-import pandas
 from pandas import read_csv
+import collections
+import matplotlib.pyplot as plt
 
 
 def loadCsv(path):
@@ -25,3 +26,15 @@ def removeColumns(dataframe, columns):
     print('Dim before the removal:', shape)
     print('Dim after the removal:', dataframe.shape)
     return dataframe, removedColumns
+
+
+def countLabels(dataframe):
+    c = collections.Counter(dataframe['Label'])
+    return c
+
+
+def printHistogram(dataframe, c):
+    labels = (list(c))
+    plt.hist(dataframe['Label'], bins=len(labels))
+    plt.show()
+    return

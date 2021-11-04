@@ -1,5 +1,5 @@
 # file path
-from functions import loadCsv, preElaborationData, removeColumns
+from functions import loadCsv, preElaborationData, removeColumns, countLabels, printHistogram
 
 # retrieve the csv file
 path = "C:\\Users\\pegasusgio\\Downloads\\trainDdosLabelNumeric.csv"
@@ -15,5 +15,9 @@ print('The attributes labels:\n', dataframe.columns, '\n')
 # pre-elaboration
 columns = list(dataframe.columns.values)  # list take an Index type and return attributes' labels as array
 statistics = preElaborationData(dataframe, columns)  # loop over each column and compute describe function
-dataframe, removedColumns = removeColumns(dataframe, columns)  # remove the columns that have same value on min-max(not only 0, they must be equal)
+dataframe, removedColumns = removeColumns(dataframe, columns)  # remove the columns that have same value on min-max
 print('The removed Columns are:', removedColumns)
+
+# retrieve cardinality of each class and print an histogram
+c = countLabels(dataframe)  # return a Counter
+printHistogram(dataframe, c)
