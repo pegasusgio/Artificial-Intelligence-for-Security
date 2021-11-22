@@ -64,15 +64,14 @@ def stratifiedKFold(X, y, folds, seed):
         yTestList.append(y.iloc[testIndex])
     return xTrainList, xTestList, yTrainList, yTestList
 
-'''
-def decisionTreeLearner(X, y, c, ccp, seed):
-    tree = DecisionTreeClassifier(criterion=c, random_state=seed, ccp_alpha=ccp)
+
+def decisionTreeLearner(X, y, criterion, ccp_alpha, seed):
+    tree = DecisionTreeClassifier(criterion=criterion, random_state=seed, ccp_alpha=ccp_alpha)
     tree.fit(X, y)
     return tree
 
 
 def showTree(tree):
-    fig = plt.figure(figsize=(40, 30))
+    plt.figure(figsize=(40, 30))
     plot_tree(tree)
-    plt.show(tree)
-'''
+    plt.show()

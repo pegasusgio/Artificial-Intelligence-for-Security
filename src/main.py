@@ -29,8 +29,8 @@ cols = list(dataframe.columns.values)   # retrieves all the attribute names
 independentList = cols[0:dataframe.shape[1]-1]   # remove from the cols list named 'Label'
 print('Independent List:', independentList, '\n')
 target = 'Label'
-X = dataframe.loc[:, independentList]  # all dataframe values except for 'Label'
-y = dataframe[target]  # array containing the only label values
+X = dataframe.loc[:, independentList]  # projection done on the independent variables
+y = dataframe[target]  # projection done on the label
 folds = 5  # number of folds
 seed = 42  # value to randomize the random split
 np.random.seed(seed)
@@ -40,7 +40,5 @@ print(dataframe.head())
 
 
 # decision Tree
-'''
 t = decisionTreeLearner(X, y, 'entropy', 0.001, seed)
 showTree(t)
-'''
