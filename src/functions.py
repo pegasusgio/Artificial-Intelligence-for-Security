@@ -1,5 +1,7 @@
+import numpy as np
 from pandas import read_csv, DataFrame
 from sklearn import model_selection
+from sklearn.metrics import f1_score
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 import collections
 import matplotlib.pyplot as plt
@@ -75,3 +77,40 @@ def showTree(tree):
     plt.figure(figsize=(40, 30))
     plot_tree(tree)
     plt.show()
+
+
+def decisionTreeF1(xTest, yTest, tree):
+    yPred = tree.predict(xTest)
+    f1score = f1_score(yTest, yPred, average='weighted')
+    return f1score
+
+
+def determineDecisionTreekFoldConfiguration(xTrainList, xTestList, yTrainList, yTestList, seed):
+
+    # variables declaration
+    criterionList = ['entropy', 'gini']
+    bestCcp_alpha = 0
+    bestCriterion = ''
+    bestF1score = 0
+    minRange = 0
+    maxRange = 0.05
+    step = 0.001
+    counter = 0;
+
+    for x, y, z, w in zip(xTrainList, yTrainList, xTestList, yTestList):
+        counter = counter+1
+        for ccp_alpha in np.arange(minRange, maxRange, step):
+            for criterion in criterionList:
+                t = decisionTreeLearner(x, y, criterion, ccp_alpha, seed)
+                f1score = decisionTreeF1(z, w, t)
+                print('\n**************************')
+                print('Iteration:', counter)
+                print('Ccp_alpha:', ccp_alpha)
+                print('Criterion:', criterion)
+                print('Seed:', seed)
+                print('f1score:', f1score)
+                if f1score > bestF1score:
+                    bestF1score = f1score
+                    bestCriterion = criterion
+                    bestCcp_alpha = ccp_alpha
+    return bestCcp_alpha, bestCriterion, bestF1score
