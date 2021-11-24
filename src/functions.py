@@ -95,7 +95,7 @@ def determineDecisionTreekFoldConfiguration(xTrainList, xTestList, yTrainList, y
     minRange = 0
     maxRange = 0.05
     step = 0.001
-    counter = 0;
+    counter = 0
 
     for x, y, z, w in zip(xTrainList, yTrainList, xTestList, yTestList):
         counter = counter+1
