@@ -1,7 +1,7 @@
 import numpy as np
 from pandas import read_csv, DataFrame
 from sklearn import model_selection
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, confusion_matrix
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 import collections
 import matplotlib.pyplot as plt
@@ -27,15 +27,14 @@ def removeColumns(dataframe, columns):
         if dataframe[c].min() == dataframe[c].max():  # check if min and max values are equal
             removedColumns.append(c)
     dataframe = dataframe.drop(columns=removedColumns)
-    print('Removed columns: ', removedColumns)
-    print('Dim before the removal:', shape)
-    print('Dim after the removal:', dataframe.shape, '\n')
+    # print('Removed columns: ', removedColumns)
+    # print('Dim before the removal:', shape)
+    # print('Dim after the removal:', dataframe.shape, '\n')
     return dataframe, removedColumns
 
 
 def countLabels(dataframe):
     return collections.Counter(dataframe['Label'])
-    # return dataframe['Label'].value_counts()
 
 
 def printHistogram(dataframe):
@@ -103,7 +102,7 @@ def determineDecisionTreekFoldConfiguration(xTrainList, xTestList, yTrainList, y
             for criterion in criterionList:
                 t = decisionTreeLearner(x, y, criterion, ccp_alpha, seed)
                 f1score = decisionTreeF1(z, w, t)
-                print('\n**************************')
+                print('***************************')
                 print('Iteration:', counter)
                 print('Ccp_alpha:', ccp_alpha)
                 print('Criterion:', criterion)

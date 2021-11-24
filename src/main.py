@@ -24,49 +24,52 @@ print('The removed Columns are:', removedColumns, '\n')
 # retrieve cardinality of each class and print an histogram
 printHistogram(dataframe)
 
-# stratified K-fold CV
+# stratified K-fold cross validation
 cols = list(dataframe.columns.values)  # retrieves all the attribute names
 independentList = cols[0:dataframe.shape[1] - 1]  # remove from the cols list named 'Label'
 print('Independent List:', independentList, '\n')
 target = 'Label'
 X = dataframe.loc[:, independentList]  # projection done on the independent variables
 y = dataframe[target]  # projection done on the label
-folds = 5  # number of folds
+folds = 5
 seed = 43  # value to randomize the random split
 np.random.seed(seed)
 xTrainList, xTestList, yTrainList, yTestList = stratifiedKFold(X, y, folds, seed)
-print('\n', 'The first 5 rows')
-print(dataframe.head())
 
-print('\n//////////////////////////////\n')
-print('xTestList', '\n', xTestList, '\n')
 
 # decision Tree
 t = decisionTreeLearner(X, y, 'entropy', 0.001, seed)
 showTree(t)
 
-# retrieve the test dataset
-path = "C:\\Users\\pegasusgio\\Downloads\\testDdosLabelNumeric.csv"
-test = loadCsv(path)  # return a DataFrame
-print("Test dimension before the drop:", '\n', test.shape)
-test = test.drop(columns=removedColumns)
-print("Test dimension after the drop:", '\n', test.shape)
-
-# retrieve xTest and yTest
-cols = list(test.columns.values)  # retrieves all the attribute names
-independentList = cols[0:test.shape[1] - 1]  # remove from the cols list named 'Label'
-print('Independent List:', independentList, '\n')
-target = 'Label'
-xTest = test.loc[:, independentList]  # projection done on the independent variables
-yTest = test[target]  # projection done on the label
-print('The xTest is:\n', xTest, '\n')
-print('The yTest is:\n', yTest, '\n')
-f1score = decisionTreeF1(xTest, yTest, t)
-print('F1 Score is: ', f1score)  # f1score without k-fold cross validation
-
-bestCcp_alpha, bestCriterion, bestF1score = determineDecisionTreekFoldConfiguration(xTrainList, xTestList, yTrainList,
-                                                                                    yTestList, seed)
-print('\n********************************')
+# Takes the 5-fold cross-validation to determine best configuration with respect to the criterion
+bestCcp_alpha, bestCriterion, bestF1score = determineDecisionTreekFoldConfiguration(xTrainList,
+                                                                                    xTestList,
+                                                                                    yTrainList,
+                                                                                    yTestList,
+                                                                                    seed)
+print('********************************')
 print('bestCcp_alpha is:', bestCcp_alpha)
 print('bestCriterion is:', bestCriterion)
 print('bestF1score is:', bestF1score)
+
+# decision Tree with best possible parameters
+bestTree = decisionTreeLearner(X, y, bestCriterion, bestCcp_alpha, seed)
+showTree(bestTree)
+
+# Load the testing set testDdosLabelNumeric.csv and generate the predictions for the testing
+# samples by using the decision trees learned from the entire training set with the best configuration
+# retrieve the test dataset
+path = "C:\\Users\\pegasusgio\\Downloads\\testDdosLabelNumeric.csv"
+test = loadCsv(path)  # return a DataFrame
+test = test.drop(columns=removedColumns)
+
+
+# retrieve xTest and yTest from testSet
+colsTest = list(test.columns.values)  # retrieves all the attribute names
+independentListTest = cols[0:test.shape[1] - 1]  # remove from the cols list named 'Label'
+xTest = test.loc[:, independentListTest]  # projection done on the independent variables
+yTest = test[target]  # projection done on the label
+
+# predict xTest and compute the f1score on the best possible configuration tree
+f1score = decisionTreeF1(xTest, yTest, bestTree)
+print('F1 Score for the testSet is: ', f1score)
