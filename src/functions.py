@@ -1,7 +1,7 @@
 import numpy as np
 from pandas import read_csv, DataFrame
 from sklearn import model_selection
-from sklearn.metrics import f1_score, confusion_matrix
+from sklearn.metrics import f1_score, confusion_matrix, ConfusionMatrixDisplay, classification_report
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 import collections
 import matplotlib.pyplot as plt
@@ -85,7 +85,6 @@ def decisionTreeF1(xTest, yTest, tree):
 
 
 def determineDecisionTreekFoldConfiguration(xTrainList, xTestList, yTrainList, yTestList, seed):
-
     # variables declaration
     criterionList = ['entropy', 'gini']
     bestCcp_alpha = 0
@@ -97,7 +96,7 @@ def determineDecisionTreekFoldConfiguration(xTrainList, xTestList, yTrainList, y
     counter = 0
 
     for x, y, z, w in zip(xTrainList, yTrainList, xTestList, yTestList):
-        counter = counter+1
+        counter = counter + 1
         for ccp_alpha in np.arange(minRange, maxRange, step):
             for criterion in criterionList:
                 t = decisionTreeLearner(x, y, criterion, ccp_alpha, seed)
@@ -113,3 +112,14 @@ def determineDecisionTreekFoldConfiguration(xTrainList, xTestList, yTrainList, y
                     bestCriterion = criterion
                     bestCcp_alpha = ccp_alpha
     return bestCcp_alpha, bestCriterion, bestF1score
+
+
+def computeConfusionMatrix(yTest, yPred, tree):
+    cm = confusion_matrix(yTest, yPred, labels=tree.classes_)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=tree.classes_)
+    disp.plot()
+    plt.show()
+
+
+def showClassificationReport(yTest, yPred):
+    print(classification_report(yTest, yPred, labels=[0, 1, 2, 3, 4]))
