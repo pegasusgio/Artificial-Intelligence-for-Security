@@ -1,7 +1,9 @@
 import numpy as np
-from pandas import read_csv, DataFrame
+from pandas import read_csv
 from sklearn import model_selection
+from sklearn.cluster import KMeans
 from sklearn.metrics import f1_score, confusion_matrix, ConfusionMatrixDisplay, classification_report
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 import collections
 import matplotlib.pyplot as plt
@@ -12,12 +14,10 @@ def loadCsv(path):
 
 
 def preElaborationData(dataframe, columns):
-    statistics = DataFrame()
     for c in columns:
         print('Column name: ', c)
         statistics = (dataframe[c].describe())
         print(statistics, '\n')
-    return statistics
 
 
 def removeColumns(dataframe, columns):
@@ -27,9 +27,9 @@ def removeColumns(dataframe, columns):
         if dataframe[c].min() == dataframe[c].max():  # check if min and max values are equal
             removedColumns.append(c)
     dataframe = dataframe.drop(columns=removedColumns)
-    # print('Removed columns: ', removedColumns)
-    # print('Dim before the removal:', shape)
-    # print('Dim after the removal:', dataframe.shape, '\n')
+    print('Removed columns: ', removedColumns)
+    print('Dim before the removal:', shape)
+    print('Dim after the removal:', dataframe.shape, '\n')
     return dataframe, removedColumns
 
 
@@ -123,3 +123,62 @@ def computeConfusionMatrix(yTest, yPred, tree):
 
 def showClassificationReport(yTest, yPred):
     print(classification_report(yTest, yPred, labels=[0, 1, 2, 3, 4]))
+
+
+def dataScaler(X):
+    scaler = MinMaxScaler()
+    scaler.fit(X)
+    Xscaled = scaler.transform(X)
+    return Xscaled
+
+
+def elbowMethod(Xscaled):
+    SumOfSquaredDistances = []
+    allKmeans = []
+    minRange = 2
+    maxRange = 15
+    K = range(minRange, maxRange)
+    for i in K:
+        km = KMeans(n_clusters=i)
+        km = km.fit(Xscaled)
+        # append inertia for each cluster in the array SumOfSquaredDistances
+        SumOfSquaredDistances.append(km.inertia_)
+        # save the km-th instance
+        allKmeans.insert(i, km)
+
+    # plot the results
+    plt.plot(K, SumOfSquaredDistances, 'bx-')
+    plt.xlabel('k')
+    plt.ylabel('Sum_of_squared_distances')
+    plt.title('Elbow Method For Optimal k')
+    plt.show()
+
+    return km.labels_
+
+
+def assign_class_to_cluster(y, kmeans_labels):
+    clusters = set(kmeans_labels)  # remove the duplicates => 0,1,2,...k, e.g cluster cardinality
+    classes = set(y)  # remove the duplicates => 0,1,2,3,4, e.g the labels
+    class_to_cluster = []
+    N = 0
+    purity = 0
+    for c in clusters:  # loop over the cluster cardinality
+        # create an array of element, each element is the index of the c-th element of the cluster label
+        # (c=0, quindi cerca in kmeans_labels tutti i valori 0, e ne salva gli indici in indices)
+        indices = [i for i in range(len(kmeans_labels)) if kmeans_labels[i] == c]
+
+        # take all the prediction for the c-th cluster
+        selected_classes = [y[i] for i in indices]
+        max_class = -1
+        max_PCF = -1
+        for cl in classes:
+            pcf = selected_classes.count(cl)
+            N = N + pcf
+            print('cluster ', c, ' class ', cl, ' pcf ', pcf)
+            if pcf > max_PCF:
+                max_PCF = pcf  # predicted class frequency
+                max_class = cl
+        # max_class is the class associated to the cluster c
+        purity = purity + max_PCF
+        class_to_cluster.append(max_class)
+    return clusters, class_to_cluster, purity / N
